@@ -1,0 +1,6 @@
+@Encine.Lottery_HostAddress = http://localhost:5038
+
+GET {{Encine.Lottery_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
