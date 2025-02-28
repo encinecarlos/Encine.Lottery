@@ -1,1 +1,43 @@
+name: deploy to Azure Web App
 
+on:
+  push:
+    branches:
+      - main
+env:
+    AZURE_WEBAPP_NAME: "Encine.Lottery"
+    AZURE_RESOURCE_GROUP: "encine-lottery-RG"
+    AZURE_REGION: '"Brazil South"'
+    AZURE_WEBAPP_PACKAGE_PATH: "."
+    DOTNET_VERSION: "8.0"
+        
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup .NET ${{ env.DOTNET_VERSION }} environment
+        uses: actions/setup-dotnet@v4
+        with:
+            dotnet-version: ${{ env.DOTNET_VERSION }}
+      
+      - name: login to Azure
+        uses: azure/login@v1  
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
+      - name: Build application
+        run: dotnet build ./Encine.Lottery.sln
+        
+      - name: Publish application
+        run: dotnet publish ./Encine.Lottery.sln --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+        
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deplot@v3
+        with:
+          app-name: ${{env.AZURE_WEBAPP_NAME}}
+          slot-name: "production"
+          package: ${{env.AZURE_WEBAPP_PACKAGE_PATH}}
